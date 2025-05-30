@@ -15,7 +15,6 @@ class Tukin extends Model
         'id',
         'id_tukin',
         'id_proses',
-        'status',
         'nomor_tukin',
         'kdsatker',
         'nip',
@@ -42,6 +41,11 @@ class Tukin extends Model
         'kali_pembayaran',
         'nomor_tukin_lama',
         'nomor_tukin_baru',
+        'tni_pns',
         'header_id',
     ];
+    public function header()
+{
+    return $this->belongsTo(Header::class);
+}
 }

@@ -8,11 +8,13 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class TukinImport implements ToModel, WithHeadingRow
 {
-    protected $tniPns;
+    protected $tni_pns;
+    protected $headerId;
 
-    public function __construct(string $tniPns = 'TNI')
+    public function __construct($tni_pns, $headerId)
     {
-        $this->tniPns = strtoupper($tniPns); // Pastikan uppercase: TNI / PNS
+        $this->tni_pns = strtoupper($tni_pns); // Pastikan uppercase: TNI / PNS
+        $this->headerId = $headerId; // ID header untuk relasi    
     }
 
     /**
@@ -22,9 +24,10 @@ class TukinImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
         return new Tukin([
+            'header_id' => $this->headerId,
             'id_tukin' => $row['id_tukin'],
             'id_proses' => $row['id_proses'],
-            'tni_pns' => $this->tniPns,
+            'tni_pns' => $this->tni_pns,
             'nomor_tukin' => $row['nomor_tukin'],
             'kdsatker' => $row['kdsatker'],
             'nip' => $row['nip'],

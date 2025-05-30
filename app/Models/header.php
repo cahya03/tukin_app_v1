@@ -16,12 +16,13 @@ class Header extends Model
         'deskripsi_header',
         'kode_satker',
         'tanggal',
-        'file_path',
+        'file_tni_path',
+        'file_pns_path',
         'created_by',
     ];
     public function satker()
     {
-        return $this->belongsTo(Satker::class);
+        return $this->belongsTo(Satker::class, 'kode_satker', 'kode_satker');
     }
     public function tukins()
     {
