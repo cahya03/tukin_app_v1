@@ -53,9 +53,6 @@
                                     Tanggal</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Jenis Pegawai</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     Aksi</th>
                             </tr>
                         </thead>
@@ -74,24 +71,13 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
                                         {{ \Carbon\Carbon::parse($header->tanggal)->format('d/m/Y') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
-                                        @if($header->file_tni_path)
-                                            <a href="{{ asset('storage/'.$header->file_tni_path) }}" class="text-blue-600 hover:underline">TNI</a>
-                                        @else
-                                            <span class="text-red-500">TNI missing</span>
-                                        @endif
-                                        /
-                                        @if($header->file_pns_path)
-                                            <a href="{{ asset('storage/'.$header->file_pns_path) }}" class="text-blue-600 hover:underline">PNS</a>
-                                        @else
-                                            <span class="text-red-500">PNS missing</span>
-                                        @endif
-                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <a href="{{ route('header.show', $header->id) }}"
                                             class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3">Lihat</a>
-                                        <a href="{{ route('header.edit', $header->id) }}"
-                                            class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 mr-3">Edit</a>
+                                            <button @click="editModalOpen = true; $dispatch('open-modal', 'edit-header-{{ $header->id }}')"
+                        class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 mr-3">
+                        Edit
+                             </button>
                                         <form action="{{ route('header.destroy', $header->id) }}" method="POST" class="inline">
                                             @csrf
                                             @method('DELETE')
@@ -99,6 +85,64 @@
                                                 class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                                                 onclick="return confirm('Apakah Anda yakin ingin menghapus?')">Hapus</button>
                                         </form>
+                                        
+                                        {{-- Modal Edit --}}
+                                        <x-modal name="edit-header-{{ $header->id }}" :show="$errors->any()" maxWidth="2xl">
+                                            <div class="p-6">
+                                                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Edit Header</h2>
+                                                
+                                                <form action="{{ route('header.update', $header->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    
+                                                    <div class="mb-4">
+                                                        <label for="nama_header" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                            Nama Header
+                                                        </label>
+                                                        <input type="text" name="nama_header" id="nama_header" 
+                                                            value="{{ old('nama_header', $header->nama_header) }}"
+                                                            class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:text-gray-300">
+                                                    </div>
+                                                    
+                                                    <div class="mb-4">
+                                                        <label for="kode_satker" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                            Satker
+                                                        </label>
+                                                        <select name="kode_satker" id="kode_satker" 
+                                                            class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:text-gray-300">
+                                                            <option value="">Pilih Satker</option>
+                                                            @foreach($satkers as $satker)
+                                                                <option value="{{ $satker->kode_satker }}" 
+                                                                    {{ old('kode_satker', $header->kode_satker) == $satker->kode_satker ? 'selected' : '' }}>
+                                                                    {{ $satker->nama_satker }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <div class="mb-4">
+                                                        <label for="tanggal" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                            Tanggal
+                                                        </label>
+                                                        <input type="date" name="tanggal" id="tanggal" 
+                                                            value="{{ old('tanggal', \Carbon\Carbon::parse($header->tanggal)->format('Y-m-d')) }}"
+                                                            class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:text-gray-300">
+                                                    </div>
+                                                    
+                                                    <div class="flex justify-end space-x-3 mt-6">
+                                                        <button type="button" 
+                                                            @click="editModalOpen = false; $dispatch('close-modal', 'edit-header-{{ $header->id }}')"
+                                                            class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                                            Batal
+                                                        </button>
+                                                        <button type="submit"
+                                                            class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                                            Simpan Perubahan
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </x-modal>
                                     </td>
                                 </tr>
                             @endforeach
@@ -115,11 +159,8 @@
             @endif
         </div>
     </div>
-    </div>
-    </div>
 
-
-    {{-- Komponen Modal --}}
+    {{-- Komponen Modal Tambah Tukin --}}
     <x-modal name="tambah-tukin" :show="false" maxWidth="lg">
         <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
             <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Tambah Tukin</h2>
@@ -186,4 +227,8 @@
             </form>
         </div>
     </x-modal>
+    
+    {{-- Komponen Modal Edit--}}
+
+
 </x-app-layout>

@@ -17,13 +17,8 @@
                     </x-nav-link>
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('tukin')" :active="request()->routeIs('tukin')">
-                        List Tukin
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('tukin-create')" :active="request()->routeIs('tukin-create')">
-                        Create Tukin
+                    <x-nav-link :href="route('header.index')" :active="request()->routeIs('header.*')">
+                        Tukin
                     </x-nav-link>
                 </div>
             </div>
