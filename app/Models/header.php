@@ -28,4 +28,8 @@ class Header extends Model
     {
         return $this->hasMany(Tukin::class);
     }
+    public function creator() 
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

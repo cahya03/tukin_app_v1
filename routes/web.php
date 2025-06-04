@@ -31,14 +31,7 @@ Route::post('/tukin/create/import_tni', [TukinController::class, 'import_excel_t
     ->middleware(['auth', 'verified'])
     ->name('tukin.import_tni');
 
-Route::resource('/header', HeaderController::class)
+Route::resource('/headers', HeaderController::class)
     ->middleware(['auth', 'verified']);
-
-Route::post('/header/store', [HeaderController::class, 'store'])
-    ->middleware(['auth', 'verified'])
-    ->name('header.store');
 require __DIR__ . '/auth.php';
-
-
-Route::get('/header/{header}', [HeaderController::class, 'show'])->name('header.show');
 

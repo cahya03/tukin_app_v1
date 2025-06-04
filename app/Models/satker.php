@@ -10,7 +10,7 @@ class Satker extends Model
     use HasFactory;
 
     protected $table = 'satkers';
-    
+
     protected $fillable = [
         'kode_satker',
         'nama_satker'
@@ -19,5 +19,9 @@ class Satker extends Model
     public function headers()
     {
         return $this->hasMany(Header::class, 'kode_satker');
+    }
+    public function users()
+    {
+        return $this->hasMany(User::class, 'kode_satker', 'kode_satker');
     }
 }

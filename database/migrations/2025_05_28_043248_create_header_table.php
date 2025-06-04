@@ -26,7 +26,13 @@ return new class extends Migration
             $table->foreign('kode_satker')
                   ->references('kode_satker')
                   ->on('satkers') // Note: plural table name
-                  ->onDelete('cascade');
+                  ->onDelete('restrict');
+
+            $table->foreign('created_by')
+                  ->references('id')
+                  ->on('users') // Note: plural table name
+                  ->onDelete('set null');
+
         });
     }
 
@@ -35,6 +41,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('header');
+        Schema::dropIfExists('headers');
     }
 };

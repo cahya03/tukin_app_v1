@@ -31,10 +31,11 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Juru Bayar',
+            'name' => 'Juru Bayar Disinfolahta',
             'email' => 'jurubayar@example.com',
             'password' => Hash::make('password'),
-            'role' => 'juru bayar',
+            'role' => 'juru_bayar',
+            'kode_satker' => 'B301',
         ]);
     }
 }

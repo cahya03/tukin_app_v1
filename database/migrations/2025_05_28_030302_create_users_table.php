@@ -18,8 +18,14 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('role')->default('juru bayar');
+            $table->string('kode_satker')->nullable();
             $table->rememberToken();
             $table->timestamps();
+
+            $table->foreign('kode_satker')
+                ->references('kode_satker')
+                ->on('satkers')
+                ->onDelete('set null');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

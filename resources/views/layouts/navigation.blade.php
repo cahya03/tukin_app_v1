@@ -17,7 +17,7 @@
                     </x-nav-link>
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('header.index')" :active="request()->routeIs('header.*')">
+                    <x-nav-link :href="route('headers.index')" :active="request()->routeIs('headers.*')">
                         Tukin
                     </x-nav-link>
                 </div>

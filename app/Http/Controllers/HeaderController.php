@@ -11,17 +11,38 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Services\ExcelImportService;
+use Illuminate\Support\Facades\Auth;
 
 class HeaderController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('can:view,header')->only('show');
+    }
+
     public function index()
     {
-        $headers = Header::with(['satker' => function ($query) {
-            $query->select('kode_satker', 'nama_satker');
-        }])->latest()->paginate(10);
-        $satkers = Satker::select('kode_satker', 'nama_satker')->get();
+        // Filter berdasarkan role user
+        $headers = Header::query()
+            ->when(Auth::user()->role === 'juru_bayar', function ($query) {
+                $query->where('kode_satker', Auth::user()->satker->kode_satker);
+            })
+            ->with(['satker' => function ($query) {
+                $query->select('kode_satker', 'nama_satker');
+            }])
+            ->latest()
+            ->paginate(10);
 
-        return view('headers.create', ['headers' => $headers, 'satkers' => $satkers]);
+        // Filter satker yang bisa dipilih berdasarkan role
+        $satkers = Satker::query()
+            ->when(Auth::user()->role === 'juru_bayar', function ($query) {
+                return $query->where('kode_satker', Auth::user()->kode_satker);
+            })
+            ->select('kode_satker', 'nama_satker')
+            ->get();
+
+        return view('headers.create', compact('headers', 'satkers'));
     }
 
     public function store(Request $request)
@@ -29,7 +50,9 @@ class HeaderController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_header' => 'required|string|max:255',
             'deskripsi_header' => 'required|string|max:255',
-            'kode_satker' => 'required|exists:satkers,kode_satker',
+            'kode_satker' => Auth::user()->role === 'admin'
+                ? 'required|exists:satkers,kode_satker'
+                : 'required|in:' . Auth::user()->kode_satker,
             'tanggal' => 'required|date',
             'file_tni' => 'required|file|mimes:zip,xls,xlsx|max:2048',
             'file_pns' => 'required|file|mimes:zip,xls,xlsx|max:2048'
@@ -53,10 +76,13 @@ class HeaderController extends Controller
             $header = Header::create([
                 'nama_header' => $request->nama_header,
                 'deskripsi_header' => $request->deskripsi_header,
-                'kode_satker' => $request->kode_satker,
+                'kode_satker' => Auth::user()->role === 'admin'
+                    ? $request->kode_satker
+                    : Auth::user()->kode_satker,
                 'tanggal' => $request->tanggal,
                 'file_tni_path' => $filePathTNI,
                 'file_pns_path' => $filePathPNS,
+                'created_by' => Auth::id(), // Catat pembuat header
             ]);
 
             if ($filePathTNI && $filePathPNS) {
@@ -90,13 +116,27 @@ class HeaderController extends Controller
         return view('headers.show', compact('header', 'tniData', 'pnsData'));
     }
 
-    public function update(Request $request, $id)
+    public function edit(Header $header)
     {
-        $header = Header::findOrFail($id);
+        // Get satkers based on user role
+        $satkers = Satker::query()
+            ->when(Auth::user()->role === 'juru_bayar', function ($query) {
+                return $query->where('kode_satker', Auth::user()->kode_satker);
+            })
+            ->select('kode_satker', 'nama_satker')
+            ->get();
 
+        return view('headers.edit', compact('header', 'satkers'));
+    }
+
+    public function update(Request $request, Header $header)
+    {
+        // Dynamic validation based on role
         $validator = Validator::make($request->all(), [
             'nama_header' => 'required|string|max:255',
-            'kode_satker' => 'required|exists:satkers,kode_satker',
+            'kode_satker' => Auth::user()->role === 'admin'
+                ? 'required|exists:satkers,kode_satker'
+                : 'required|in:'.Auth::user()->kode_satker,
             'tanggal' => 'required|date',
         ]);
 
@@ -108,23 +148,27 @@ class HeaderController extends Controller
 
         $header->update([
             'nama_header' => $request->nama_header,
-            'kode_satker' => $request->kode_satker,
+            'kode_satker' => Auth::user()->role === 'admin'
+                ? $request->kode_satker
+                : Auth::user()->kode_satker,
             'tanggal' => $request->tanggal,
         ]);
 
-        return redirect()->route('header.index')
+        return redirect()->route('headers.index')
             ->with('success', 'Header berhasil diperbarui');
     }
 
-    public function destroy($id)
+    public function destroy(Header $header)
     {
-        $header = Header::findOrFail($id);
+        // Delete related files
+        Storage::disk('public')->delete([$header->file_tni_path, $header->file_pns_path]);
+        
         $header->delete();
 
-        return redirect()->route('header.index')
+        return redirect()->route('headers.index')
             ->with('success', 'Header berhasil dihapus');
     }
-    
+
     private function storeFileWithCustomName($file, $prefix)
     {
         try {

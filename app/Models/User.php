@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'kode_satker',
     ];
 
     /**
@@ -32,6 +34,11 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public function satker()
+    {
+        return $this->belongsTo(Satker::class, 'kode_satker', 'kode_satker');
+    }
 
     /**
      * Get the attributes that should be cast.

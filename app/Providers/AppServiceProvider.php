@@ -3,12 +3,14 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\Header;
+use App\Policies\HeaderPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+    protected $policies = [
+    Header::class => HeaderPolicy::class,
+];
     public function register(): void
     {
         //
