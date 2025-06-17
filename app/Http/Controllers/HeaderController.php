@@ -12,6 +12,7 @@ use Illuminate\support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Services\ExcelImportService;
 use Illuminate\Support\Facades\Auth;
+use App\Services\ActivityLogService;
 
 class HeaderController extends Controller
 {
@@ -42,6 +43,11 @@ class HeaderController extends Controller
             ->select('kode_satker', 'nama_satker')
             ->get();
 
+        // Log aktivitas melihat daftar header
+        ActivityLogService::log(
+            'view_headers_list',
+            'Melihat daftar header'
+        );
         return view('headers.create', compact('headers', 'satkers'));
     }
 
@@ -90,9 +96,23 @@ class HeaderController extends Controller
                 $excelImportService->importFromHeader($header);
             }
             DB::commit();
+            // Log aktivitas membuat header berhasil
+            ActivityLogService::logCreateHeader([
+                'id' => $header->id,
+                'title' => $header->title
+            ]);
             return redirect()->back()->with('sukses', 'Header berhasil ditambahkan');
         } catch (\Exception $e) {
             DB::rollBack();
+            // Log aktivitas membuat header gagal
+            ActivityLogService::log(
+                ActivityLogService::CREATE_HEADER,
+                'Gagal membuat header: ' . $request->title,
+                $request,
+                null,
+                'failed',
+                $e->getMessage()
+            );
             return redirect()->back()
                 ->with('error', 'Gagal menyimpan data: ' . $e->getMessage())
                 ->withInput();
@@ -113,6 +133,12 @@ class HeaderController extends Controller
         $tniData = $header->tukins()->where('tni_pns', 'TNI')->orderBy('nama_pegawai')->paginate(10, ['*'], 'tni_page');
         $pnsData = $header->tukins()->where('tni_pns', 'PNS')->orderBy('nama_pegawai')->paginate(10, ['*'], 'pns_page');
 
+        // Log aktivitas melihat detail header
+        ActivityLogService::logViewHeader(
+            $header->id,
+            $header->nama_header,
+        );
+
         return view('headers.show', compact('header', 'tniData', 'pnsData'));
     }
 
@@ -126,6 +152,12 @@ class HeaderController extends Controller
             ->select('kode_satker', 'nama_satker')
             ->get();
 
+        ActivityLogService::log(
+            'access_edit_header_form',
+            'Mengakses form edit header: ' . $header->title,
+            null,
+            ['header_id' => $header->id]
+        );
         return view('headers.edit', compact('header', 'satkers'));
     }
 
@@ -136,15 +168,28 @@ class HeaderController extends Controller
             'nama_header' => 'required|string|max:255',
             'kode_satker' => Auth::user()->role === 'admin'
                 ? 'required|exists:satkers,kode_satker'
-                : 'required|in:'.Auth::user()->kode_satker,
+                : 'required|in:' . Auth::user()->kode_satker,
             'tanggal' => 'required|date',
         ]);
 
         if ($validator->fails()) {
+            ActivityLogService::log(
+                ActivityLogService::UPDATE_HEADER,
+                'Gagal mengupdate header ID: ' . $header->id,
+                $request,
+                ['header_id' => $header->id],
+                'failed',
+            );
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
+        // Log aktivitas sebelum update
+        $oldData = $header->only([
+            'nama_header',
+            'kode_satker',
+            'tanggal',
+        ]);
 
         $header->update([
             'nama_header' => $request->nama_header,
@@ -153,7 +198,22 @@ class HeaderController extends Controller
                 : Auth::user()->kode_satker,
             'tanggal' => $request->tanggal,
         ]);
-
+        $changes = [];
+        $newData = $request->only([
+            'nama_header',
+            'kode_satker',
+            'tanggal',
+        ]);
+        foreach ($newData as $field => $newValue) {
+            if ($oldData[$field] !== $newValue) {
+                $changes[$field] = [
+                    'old' => $oldData[$field],
+                    'new' => $newValue
+                ];
+            }
+        }
+        // Log aktivitas update header
+        ActivityLogService::logUpdateHeader($header->id, $changes);
         return redirect()->route('headers.index')
             ->with('success', 'Header berhasil diperbarui');
     }
@@ -162,9 +222,10 @@ class HeaderController extends Controller
     {
         // Delete related files
         Storage::disk('public')->delete([$header->file_tni_path, $header->file_pns_path]);
-        
-        $header->delete();
 
+        $header->delete();
+        // Log aktivitas menghapus header
+        ActivityLogService::logDeleteHeader($header->id, $header->nama_header);
         return redirect()->route('headers.index')
             ->with('success', 'Header berhasil dihapus');
     }

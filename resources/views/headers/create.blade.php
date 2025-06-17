@@ -161,7 +161,7 @@
                             name="tanggal" 
                             type="date" 
                             class="mt-1 block w-full" 
-                            :value="old('tanggal', \Carbon\Carbon::parse($header->tanggal)->format('Y-m-d'))" 
+                            :value="old('tanggal', \Carbon\Carbon::now()->format('Y-m-d'))"
                             required 
                         />
                         <x-input-error :messages="$errors->get('tanggal')" class="mt-2" />

@@ -87,9 +87,9 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'handler' => env('LOG_PAPERTRAIL_HANDLER', SyslogUdpHandler::class),
             'handler_with' => [
-                'host' => env('PAPERTRAIL_URL'),
-                'port' => env('PAPERTRAIL_PORT'),
-                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
+                'host' => env('PAPERTRAIL_URL', 'localhost'),
+                'port' => env('PAPERTRAIL_PORT', 514),
+                'connectionString' => 'tls://' . env('PAPERTRAIL_URL', 'localhost') . ':' . env('PAPERTRAIL_PORT', 514),
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],
@@ -127,6 +127,51 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        // HTTP Activity Logging Channel
+        'http_activity' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/http-activity.log'),
+            'level' => env('HTTP_ACTIVITY_LOG_LEVEL', 'info'),
+            'days' => env('HTTP_ACTIVITY_LOG_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
+        // Separate channel for API logging
+        'api_activity' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/api-activity.log'),
+            'level' => env('API_ACTIVITY_LOG_LEVEL', 'info'),
+            'days' => env('API_ACTIVITY_LOG_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
+        // Security events logging
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => env('SECURITY_LOG_LEVEL', 'warning'),
+            'days' => env('SECURITY_LOG_DAYS', 90),
+            'replace_placeholders' => true,
+        ],
+
+        // Performance monitoring
+        'performance' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/performance.log'),
+            'level' => env('PERFORMANCE_LOG_LEVEL', 'info'),
+            'days' => env('PERFORMANCE_LOG_DAYS', 7),
+            'replace_placeholders' => true,
+        ],
+
+        // Database queries logging
+        'query' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/query.log'),
+            'level' => env('QUERY_LOG_LEVEL', 'debug'),
+            'days' => env('QUERY_LOG_DAYS', 7),
+            'replace_placeholders' => true,
+        ],
+        
     ],
 
 ];
