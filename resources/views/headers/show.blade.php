@@ -74,16 +74,44 @@
                     <p><span class="font-medium">TNI:</span> {{ $tniData->count() }}</p>
                     <p><span class="font-medium">PNS:</span> {{ $pnsData->count() }}</p>
                 </div>
-
+                <!-- Search Form -->
+                <div class="mb-6">
+                    <form method="GET" action="{{ route('headers.show', $header) }}" class="flex items-center">
+                        <div class="relative flex-grow">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <input type="text" name="search" value="{{ request('search') }}"
+                                placeholder="Cari berdasarkan nama, NIP, atau nomor tukin..."
+                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <button type="submit"
+                            class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Cari
+                        </button>
+                        @if(request('search'))
+                            <a href="{{ route('headers.show', $header) }}"
+                                class="ml-2 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Reset
+                            </a>
+                        @endif
+                    </form>
+                </div>
                 <!-- Data Tabs -->
                 <div x-data="{ activeTab: 'tni' }" class="mb-6">
                     <div class="border-b border-gray-200 dark:border-gray-700">
                         <nav class="-mb-px flex space-x-8">
-                            <button @click="activeTab = 'tni'" :class="activeTab === 'tni' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+                            <button @click="activeTab = 'tni'"
+                                :class="activeTab === 'tni' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
                                 class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
                                 Data TNI ({{ $tniData->count() }})
                             </button>
-                            <button @click="activeTab = 'pns'" :class="activeTab === 'pns' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+                            <button @click="activeTab = 'pns'"
+                                :class="activeTab === 'pns' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
                                 class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
                                 Data PNS ({{ $pnsData->count() }})
                             </button>
@@ -93,6 +121,7 @@
                     <!-- TNI Data -->
                     <div x-show="activeTab === 'tni'"
                         class="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-hidden">
+                        <x-data-status type="TNI" :data="$tniData" search="{{ request('search') }}" />
                         @if($tniData->count() > 0)
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -328,7 +357,8 @@
                                                                                 ID Tukin</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->id_tukin }}</td>
+                                                                                {{ $tni->id_tukin }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -336,7 +366,8 @@
                                                                                 ID Proses</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->id_proses }}</td>
+                                                                                {{ $tni->id_proses }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -344,7 +375,8 @@
                                                                                 Nomor Tukin</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->nomor_tukin }}</td>
+                                                                                {{ $tni->nomor_tukin }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -352,7 +384,8 @@
                                                                                 Kode Satker</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->kdsatker }}</td>
+                                                                                {{ $tni->kdsatker }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -360,7 +393,8 @@
                                                                                 NIP</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->nip }}</td>
+                                                                                {{ $tni->nip }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -368,7 +402,8 @@
                                                                                 Nama Pegawai</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->nama_pegawai }}</td>
+                                                                                {{ $tni->nama_pegawai }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -376,7 +411,8 @@
                                                                                 Jenis Pegawai</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->jenis_pegawai }}</td>
+                                                                                {{ $tni->jenis_pegawai }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -384,7 +420,8 @@
                                                                                 Jenis SK</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->jenis_sk }}</td>
+                                                                                {{ $tni->jenis_sk }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -392,7 +429,8 @@
                                                                                 Nomor SK</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->nomor_sk }}</td>
+                                                                                {{ $tni->nomor_sk }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -400,7 +438,8 @@
                                                                                 Grade</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->grade }}</td>
+                                                                                {{ $tni->grade }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -408,7 +447,8 @@
                                                                                 Jenis Tukin</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->jenis_tukin }}</td>
+                                                                                {{ $tni->jenis_tukin }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -416,7 +456,8 @@
                                                                                 Kotor</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ number_format($tni->kotor, 0, ',', '.') }}</td>
+                                                                                {{ number_format($tni->kotor, 0, ',', '.') }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -433,7 +474,8 @@
                                                                                 Bersih</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ number_format($tni->bersih, 0, ',', '.') }}</td>
+                                                                                {{ number_format($tni->bersih, 0, ',', '.') }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -441,7 +483,8 @@
                                                                                 Pajak</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ number_format($tni->pajak, 0, ',', '.') }}</td>
+                                                                                {{ number_format($tni->pajak, 0, ',', '.') }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -467,7 +510,8 @@
                                                                                 Kode Bank</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->kdbankspan }}</td>
+                                                                                {{ $tni->kdbankspan }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -475,7 +519,8 @@
                                                                                 Rekening</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->rekening }}</td>
+                                                                                {{ $tni->rekening }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -483,7 +528,8 @@
                                                                                 Nama Rekening</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->nama_rekening }}</td>
+                                                                                {{ $tni->nama_rekening }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -491,7 +537,8 @@
                                                                                 Bank</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->nama_bank }}</td>
+                                                                                {{ $tni->nama_bank }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -499,7 +546,8 @@
                                                                                 Bulan Awal</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->bulan_awal }}</td>
+                                                                                {{ $tni->bulan_awal }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -507,7 +555,8 @@
                                                                                 Tahun Awal</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->tahun_awal }}</td>
+                                                                                {{ $tni->tahun_awal }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -515,7 +564,8 @@
                                                                                 Bulan Akhir</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->bulan_akhir }}</td>
+                                                                                {{ $tni->bulan_akhir }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -523,7 +573,8 @@
                                                                                 Tahun Akhir</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->tahun_akhir }}</td>
+                                                                                {{ $tni->tahun_akhir }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -531,7 +582,8 @@
                                                                                 Kali Pembayaran</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->kali_pembayaran }}</td>
+                                                                                {{ $tni->kali_pembayaran }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -539,7 +591,8 @@
                                                                                 Nomor Tukin Lama</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->nomor_tukin_lama }}</td>
+                                                                                {{ $tni->nomor_tukin_lama }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -547,7 +600,8 @@
                                                                                 Nomor Tukin Baru</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $tni->nomor_tukin_baru }}</td>
+                                                                                {{ $tni->nomor_tukin_baru }}
+                                                                            </td>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -599,18 +653,16 @@
                             <!-- Pagination -->
                             <div
                                 class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 sm:px-6">
-                                {{ $tniData->links() }}
+                                {{ $tniData->appends(['search' => request('search')])->links() }}
                             </div>
-                        @else
-                            <div class="p-6 text-center text-gray-500 dark:text-gray-400">
-                                Tidak ada data TNI
-                            </div>
+
                         @endif
                     </div>
 
                     <!-- PNS Data -->
                     <div x-show="activeTab === 'pns'"
                         class="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-hidden">
+                        <x-data-status type="PNS" :data="$pnsData" search="{{ request('search') }}" />
                         @if($pnsData->count() > 0)
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -846,7 +898,8 @@
                                                                                 ID Tukin</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->id_tukin }}</td>
+                                                                                {{ $pns->id_tukin }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -854,7 +907,8 @@
                                                                                 ID Proses</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->id_proses }}</td>
+                                                                                {{ $pns->id_proses }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -862,7 +916,8 @@
                                                                                 Nomor Tukin</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->nomor_tukin }}</td>
+                                                                                {{ $pns->nomor_tukin }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -870,7 +925,8 @@
                                                                                 Kode Satker</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->kdsatker }}</td>
+                                                                                {{ $pns->kdsatker }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -878,7 +934,8 @@
                                                                                 NIP</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->nip }}</td>
+                                                                                {{ $pns->nip }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -886,7 +943,8 @@
                                                                                 Nama Pegawai</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->nama_pegawai }}</td>
+                                                                                {{ $pns->nama_pegawai }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -894,7 +952,8 @@
                                                                                 Jenis Pegawai</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->jenis_pegawai }}</td>
+                                                                                {{ $pns->jenis_pegawai }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -902,7 +961,8 @@
                                                                                 Jenis SK</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->jenis_sk }}</td>
+                                                                                {{ $pns->jenis_sk }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -910,7 +970,8 @@
                                                                                 Nomor SK</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->nomor_sk }}</td>
+                                                                                {{ $pns->nomor_sk }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -918,7 +979,8 @@
                                                                                 Grade</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->grade }}</td>
+                                                                                {{ $pns->grade }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -926,7 +988,8 @@
                                                                                 Jenis Tukin</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->jenis_tukin }}</td>
+                                                                                {{ $pns->jenis_tukin }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -934,7 +997,8 @@
                                                                                 Kotor</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ number_format($pns->kotor, 0, ',', '.') }}</td>
+                                                                                {{ number_format($pns->kotor, 0, ',', '.') }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -951,7 +1015,8 @@
                                                                                 Bersih</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ number_format($pns->bersih, 0, ',', '.') }}</td>
+                                                                                {{ number_format($pns->bersih, 0, ',', '.') }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -959,7 +1024,8 @@
                                                                                 Pajak</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ number_format($pns->pajak, 0, ',', '.') }}</td>
+                                                                                {{ number_format($pns->pajak, 0, ',', '.') }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -985,7 +1051,8 @@
                                                                                 Kode Bank</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->kdbankspan }}</td>
+                                                                                {{ $pns->kdbankspan }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -993,7 +1060,8 @@
                                                                                 Rekening</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->rekening }}</td>
+                                                                                {{ $pns->rekening }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -1001,7 +1069,8 @@
                                                                                 Nama Rekening</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->nama_rekening }}</td>
+                                                                                {{ $pns->nama_rekening }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -1009,7 +1078,8 @@
                                                                                 Bank</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->nama_bank }}</td>
+                                                                                {{ $pns->nama_bank }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -1017,7 +1087,8 @@
                                                                                 Bulan Awal</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->bulan_awal }}</td>
+                                                                                {{ $pns->bulan_awal }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -1025,7 +1096,8 @@
                                                                                 Tahun Awal</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->tahun_awal }}</td>
+                                                                                {{ $pns->tahun_awal }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -1033,7 +1105,8 @@
                                                                                 Bulan Akhir</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->bulan_akhir }}</td>
+                                                                                {{ $pns->bulan_akhir }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -1041,7 +1114,8 @@
                                                                                 Tahun Akhir</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->tahun_akhir }}</td>
+                                                                                {{ $pns->tahun_akhir }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -1049,7 +1123,8 @@
                                                                                 Kali Pembayaran</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->kali_pembayaran }}</td>
+                                                                                {{ $pns->kali_pembayaran }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -1057,7 +1132,8 @@
                                                                                 Nomor Tukin Lama</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->nomor_tukin_lama }}</td>
+                                                                                {{ $pns->nomor_tukin_lama }}
+                                                                            </td>
                                                                         </tr>
                                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                             <td
@@ -1065,7 +1141,8 @@
                                                                                 Nomor Tukin Baru</td>
                                                                             <td
                                                                                 class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                                                {{ $pns->nomor_tukin_baru }}</td>
+                                                                                {{ $pns->nomor_tukin_baru }}
+                                                                            </td>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -1117,11 +1194,7 @@
                             <!-- Pagination -->
                             <div
                                 class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 sm:px-6">
-                                {{ $pnsData->links() }}
-                            </div>
-                        @else
-                            <div class="p-6 text-center text-gray-500 dark:text-gray-400">
-                                Tidak ada data PNS
+                                {{ $pnsData->appends(['search' => request('search')])->links() }}
                             </div>
                         @endif
                     </div>

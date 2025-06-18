@@ -5,14 +5,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TukinController;
 use App\Http\Controllers\HeaderController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'dashboard'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

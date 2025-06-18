@@ -119,21 +119,56 @@ class HeaderController extends Controller
         }
     }
 
-    public function show(Header $header)
+    public function show(Request $request, Header $header)
     {
-        // Eager load satker dan data tukin terkait
+        // Eager load dengan urutan yang benar
         $header->load([
             'satker',
-            'tukins' => function ($query) {
+            'tukins' => function ($query) use ($request) {
                 $query->orderBy('tni_pns')->orderBy('nama_pegawai');
+
+                // Tambahkan pencarian jika ada
+                if ($request->has('search')) {
+                    $query->where(function ($q) use ($request) {
+                        $q->where('nama_pegawai', 'like', "%{$request->search}%")
+                            ->orWhere('nip', 'like', "%{$request->search}%")
+                            ->orWhere('nomor_tukin', 'like', "%{$request->search}%");
+                    });
+                }
             }
         ]);
 
-        // Pisahkan data TNI dan PNS
-        $tniData = $header->tukins()->where('tni_pns', 'TNI')->orderBy('nama_pegawai')->paginate(10, ['*'], 'tni_page');
-        $pnsData = $header->tukins()->where('tni_pns', 'PNS')->orderBy('nama_pegawai')->paginate(10, ['*'], 'pns_page');
+        // Query terpisah untuk pagination dengan search
+        $tniQuery = $header->tukins()
+            ->where('tni_pns', 'TNI')
+            ->orderBy('nama_pegawai');
 
-        // Log aktivitas melihat detail header
+        $pnsQuery = $header->tukins()
+            ->where('tni_pns', 'PNS')
+            ->orderBy('nama_pegawai');
+
+        // Terapkan pencarian
+        if ($request->has('search')) {
+            $searchTerm = $request->search;
+
+            $tniQuery->where(function ($query) use ($searchTerm) {
+                $query->where('nama_pegawai', 'like', "%{$searchTerm}%")
+                    ->orWhere('nip', 'like', "%{$searchTerm}%")
+                    ->orWhere('nomor_tukin', 'like', "%{$searchTerm}%");
+            });
+
+            $pnsQuery->where(function ($query) use ($searchTerm) {
+                $query->where('nama_pegawai', 'like', "%{$searchTerm}%")
+                    ->orWhere('nip', 'like', "%{$searchTerm}%")
+                    ->orWhere('nomor_tukin', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Lakukan pagination SETELAH semua kondisi where
+        $tniData = $tniQuery->paginate(10, ['*'], 'tni_page');
+        $pnsData = $pnsQuery->paginate(10, ['*'], 'pns_page');
+
+        // Log aktivitas
         ActivityLogService::logViewHeader(
             $header->id,
             $header->nama_header,
@@ -229,6 +264,70 @@ class HeaderController extends Controller
         return redirect()->route('headers.index')
             ->with('success', 'Header berhasil dihapus');
     }
+
+    // public function dashboard()
+    // {
+    //     // Data statistik ringkasan
+    //     $totalHeaders = Header::count();
+    //     $totalRecipients = DB::table('tukin')->count();
+    //     $tniCount = DB::table('tukin')->where('tni_pns', 'TNI')->count();
+    //     $pnsCount = DB::table('tukin')->where('tni_pns', 'PNS')->count();
+
+    //     // Data untuk chart total tukin per bulan
+    //     $monthlyData = Header::select(
+    //         DB::raw('YEAR(tanggal) as year'),
+    //         DB::raw('MONTH(tanggal) as month'),
+    //         DB::raw('COUNT(id) as total_headers'),
+    //         DB::raw('SUM((SELECT COUNT(*) FROM tukin WHERE tukin.header_id = headers.id)) as total_recipients')
+    //     )
+    //         ->groupBy('year', 'month')
+    //         ->orderBy('year', 'asc')
+    //         ->orderBy('month', 'asc')
+    //         ->get();
+
+    //     // Data untuk chart TNI vs PNS
+    //     $tniPnsData = DB::table('tukin')
+    //         ->select(
+    //             'tni_pns',
+    //             DB::raw('COUNT(*) as total')
+    //         )
+    //         ->groupBy('tni_pns')
+    //         ->get();
+
+    //     // Data untuk top satker
+    //     $topSatkers = DB::table('headers')
+    //         ->join('satkers', 'headers.kode_satker', '=', 'satkers.kode_satker')
+    //         ->select(
+    //             'satkers.nama_satker',
+    //             DB::raw('COUNT(headers.id) as total_headers'),
+    //             DB::raw('(SELECT COUNT(*) FROM tukin WHERE tukins.header_id IN 
+    //                  (SELECT id FROM headers WHERE kode_satker = satkers.kode_satker)) as total_recipients')
+    //         )
+    //         ->groupBy('satkers.kode_satker', 'satkers.nama_satker')
+    //         ->orderBy('total_recipients', 'desc')
+    //         ->take(10)
+    //         ->get();
+
+    //     // Aktivitas terakhir
+    //     $recentActivities = DB::table('activity_logs')
+    //         ->orderBy('created_at', 'desc')
+    //         ->take(5)
+    //         ->get();
+
+    //     ActivityLogService::log('view_dashboard', 'Mengakses dashboard');
+
+    //     return view('dashboard', compact(
+    //         'totalHeaders',
+    //         'totalRecipients',
+    //         'tniCount',
+    //         'pnsCount',
+    //         'monthlyData',
+    //         'tniPnsData',
+    //         'topSatkers',
+    //         'recentActivities'
+    //     ));
+    // }
+
 
     private function storeFileWithCustomName($file, $prefix)
     {
