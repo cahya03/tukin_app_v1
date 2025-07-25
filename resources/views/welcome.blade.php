@@ -12,17 +12,13 @@
 
     <div class="text-center">
         <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-        <h1 class="text-4xl font-bold mb-4">Aplikasi Tukin TNI</h1>
-        <p class="mb-8 text-lg text-gray-600">Silakan login atau register untuk masuk ke sistem.</p>
+        <h1 class="text-4xl font-bold mb-1">SIPATUKIN TNI AU</h1>
+        <h2 class="text-2xl font-bold mb-16">Sistem Pengarsipan Tunjangan Kinerja TNI AU</h1>
 
         <div class="flex justify-center space-x-4">
             <a href="{{ route('login') }}"
                 class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded transition">
                 Login
-            </a>
-            <a href="{{ route('register') }}"
-                class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded transition">
-                Register
             </a>
         </div>
     </div>

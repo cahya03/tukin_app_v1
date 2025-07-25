@@ -24,9 +24,14 @@ class ActivityLogService
     const VIEW_POST = 'view_post';
     const UPDATE_POST = 'update_post';
     const DELETE_POST = 'delete_post';
+    const CREATE_USER = 'create_user';
+    const VIEW_USER = 'view_user';
+    const UPDATE_USER = 'update_user';
+    const DELETE_USER = 'delete_user';
     const PROFILE_UPDATE = 'profile_update';
     const EMAIL_VERIFICATION = 'email_verification';
     const UNAUTHORIZED_ACCESS = 'unauthorized_access';
+
 
     /**
      * Log aktivitas user
@@ -216,7 +221,55 @@ class ActivityLogService
             ['header_id' => $headerId]
         );
     }
-
+    /**
+     * Log aktivitas melihat user
+     */
+    public static function logViewUser(int $userId, string $userTitle, ?Request $request = null): void
+    {
+        self::log(
+            self::VIEW_USER,
+            'Melihat user: ' . $userTitle,
+            $request,
+            ['user_id' => $userId]
+        );
+    }
+    /**
+     * Log aktivitas membuat user
+     */
+    public static function logCreateUser(array $userData, ?Request $request = null): void
+    {
+        self::log(
+            self::CREATE_USER,
+            'Membuat user baru: ' . ($userData['title'] ?? 'Unknown'),
+            $request,
+            ['user_id' => $userData['id'] ?? null]
+        );
+    }
+    
+    /**
+     * Log aktivitas mengupdate user
+     */
+    public static function logUpdateUser(int $userId, array $changes, ?Request $request = null): void
+    {
+        self::log(
+            self::UPDATE_USER,
+            'Mengupdate user ID: ' . $userId,
+            $request,
+            ['user_id' => $userId, 'changes' => $changes]
+        );
+    }
+    /**
+     * Log aktivitas menghapus user
+     */
+    public static function logDeleteUser(int $userId, string $userTitle, ?Request $request = null): void
+    {
+        self::log(
+            self::DELETE_USER,
+            'Menghapus user: ' . $userTitle,
+            $request,
+            ['user_id' => $userId]
+        );
+    }
     /**
      * Log aktivitas update profile
      */

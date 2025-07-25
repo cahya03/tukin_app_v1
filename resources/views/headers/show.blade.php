@@ -68,8 +68,8 @@
                 </div>
 
                 <!-- Statistics -->
-                <div class="space-y-4 text-white mb-6">
-                    <h3 class="text-lg font-semibold border-b pb-2">Statistik</h3>
+                <div class="space-y-4 text-gray-800 dark:text-white mb-6">
+                    <h3 class="text-lg font-semibold border-b pb-2 border-gray-300 dark:border-gray-600">Statistik</h3>
                     <p><span class="font-medium">Total Data:</span> {{ $header->tukins->count() }}</p>
                     <p><span class="font-medium">TNI:</span> {{ $tniData->count() }}</p>
                     <p><span class="font-medium">PNS:</span> {{ $pnsData->count() }}</p>
@@ -304,7 +304,12 @@
                                                     {{ $tni->nomor_tukin_baru }}
                                                 </td>
                                                 <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <x-dropdown align="right" width="48">
+                                                    <button
+                                                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                                        @click="$dispatch('open-modal', 'detail-tni-{{ $tni->id }}')">
+                                                        Detail
+                                                    </button>
+                                                    {{-- <x-dropdown align="right" width="48">
                                                         <x-slot name="trigger">
                                                             <button
                                                                 class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
@@ -323,21 +328,8 @@
                                                                 @click="$dispatch('open-modal', 'detail-tni-{{ $tni->id }}')">
                                                                 Detail
                                                             </x-dropdown-link>
-
-                                                            @can('update', $header)
-                                                                <x-dropdown-link href="{{ route('headers.edit', $tni->id) }}">
-                                                                    Edit
-                                                                </x-dropdown-link>
-                                                            @endcan
-
-                                                            @can('delete', $header)
-                                                                <x-dropdown-link
-                                                                    @click="$dispatch('open-modal', 'confirm-tni-deletion-{{ $tni->id }}')">
-                                                                    Hapus
-                                                                </x-dropdown-link>
-                                                            @endcan
                                                         </x-slot>
-                                                    </x-dropdown>
+                                                    </x-dropdown> --}}
 
                                                     <!-- Detail Modal -->
                                                     <x-modal name="detail-tni-{{ $tni->id }}" focusable>
@@ -845,7 +837,12 @@
                                                     {{ $pns->nomor_tukin_baru }}
                                                 </td>
                                                 <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <x-dropdown align="right" width="48">
+                                                    <button
+                                                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                                        @click="$dispatch('open-modal', 'detail-pns-{{ $pns->id }}')">
+                                                        Detail
+                                                    </button>
+                                                    {{-- <x-dropdown align="right" width="48">
                                                         <x-slot name="trigger">
                                                             <button
                                                                 class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
@@ -878,7 +875,7 @@
                                                                 </x-dropdown-link>
                                                             @endcan
                                                         </x-slot>
-                                                    </x-dropdown>
+                                                    </x-dropdown> --}}
 
                                                     <!-- Detail Modal -->
                                                     <x-modal name="detail-pns-{{ $pns->id }}" focusable>

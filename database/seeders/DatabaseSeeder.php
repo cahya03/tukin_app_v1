@@ -15,27 +15,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
         $this->call([
             TukinSeeder::class,
             SatkerSeeder::class,
+            UserSeeder::class,
         ]);
         User::create([
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('password'),
             'role' => 'admin',
-        ]);
-
-        User::create([
-            'name' => 'Juru Bayar Disinfolahta',
-            'email' => 'jurubayar@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'juru_bayar',
-            'kode_satker' => 'B301',
         ]);
     }
 }

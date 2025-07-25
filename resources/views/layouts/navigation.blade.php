@@ -22,9 +22,18 @@
                     </x-nav-link>
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    @can('view', App\Models\ActivityLog::class) 
                     <x-nav-link :href="route('admin.activity-logs.index')" :active="request()->routeIs('admin.activity-logs.*')">
                         Log
                     </x-nav-link>
+                    @endcan
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    @can('view', App\Models\User::class) 
+                    <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                        User
+                    </x-nav-link>
+                    @endcan
                 </div>
             </div>
 
