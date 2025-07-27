@@ -7,6 +7,8 @@ use App\Listeners\AuthActivityListener;
 use App\Policies\ActivityLogPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\App;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,5 +35,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         parent::boot();
+        App::setLocale('id');
+        Carbon::setLocale('id');
     }
 }

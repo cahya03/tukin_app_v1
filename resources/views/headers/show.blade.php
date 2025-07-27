@@ -30,7 +30,7 @@
                                     <div>
                                         <p class="font-semibold">File TNI:</p>
                                         @if($header->file_tni_path)
-                                            <a href="{{ asset('storage/' . $header->file_tni_path) }}"
+                                            <a href="{{ $header->file_tni_url }}"
                                                 class="text-blue-600 hover:underline flex items-center">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none"
                                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -47,7 +47,7 @@
                                     <div>
                                         <p class="font-semibold">File PNS:</p>
                                         @if($header->file_pns_path)
-                                            <a href="{{ asset('storage/' . $header->file_pns_path) }}"
+                                            <a href="{{ $header->file_pns_url }}"
                                                 class="text-blue-600 hover:underline flex items-center">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none"
                                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">

@@ -28,8 +28,17 @@ class Header extends Model
     {
         return $this->hasMany(Tukin::class);
     }
-    public function creator() 
+    public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+    public function getFileTniUrlAttribute()
+    {
+        return asset($this->file_tni_path);
+    }
+
+    public function getFilePnsUrlAttribute()
+    {
+        return asset($this->file_pns_path);
     }
 }

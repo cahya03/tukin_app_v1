@@ -9,6 +9,7 @@ use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -30,6 +31,8 @@ class DashboardController extends Controller
         $satkerComparison = $this->getSatkerComparison();
         $recentActivities = $this->getRecentActivities(5);
         $additionalStats = $this->getAdditionalStats();
+        $tunkinUploadStatus = $this->getTunkinUploadStatus();
+        $headers = Header::latest()->get();
 
         ActivityLogService::log('view_admin_dashboard', 'Mengakses dashboard admin');
 
@@ -40,7 +43,9 @@ class DashboardController extends Controller
             'topSatkers',
             'recentActivities',
             'satkerComparison',
-            'additionalStats'
+            'additionalStats',
+            'tunkinUploadStatus',
+            'headers'
         ));
     }
 
@@ -271,6 +276,32 @@ class DashboardController extends Controller
                 : 0,
         ];
     }
+    
+    protected function getTunkinUploadStatus($tahun = null)
+    {
+        $tahun = $tahun ?? now()->year;
+        $satkers = Satker::orderBy('kode_satker')->get();
+
+        $uploadStatus = $satkers->map(function ($satker) use ($tahun) {
+        $statusPerBulan = [];
+
+        for ($bulan = 1; $bulan <= 12; $bulan++) {
+            $exists = Header::where('kode_satker', $satker->kode_satker)
+                ->whereYear('tanggal', $tahun)
+                ->whereMonth('tanggal', $bulan)
+                ->exists();
+
+            $statusPerBulan[$bulan] = $exists;
+        }
+        return [
+            'nama_satker' => $satker->nama_satker,
+            'kode_satker' => $satker->kode_satker,
+            'bulan_status' => $statusPerBulan,
+        ];
+
+        });
+        return $uploadStatus;
+    }
 
     public function getDashboardData()
     {
@@ -304,4 +335,6 @@ class DashboardController extends Controller
 
         return response()->json($data);
     }
+
+
 }

@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use App\Services\ExcelImportService;
 use Illuminate\Support\Facades\Auth;
 use App\Services\ActivityLogService;
+use Carbon\Carbon;
 
 class HeaderController extends Controller
 {
@@ -77,7 +78,9 @@ class HeaderController extends Controller
             $filePNS = $request->file('file_pns');
             $filePathTNI = $this->storeFileWithCustomName($fileTNI, 'tni');
             $filePathPNS = $this->storeFileWithCustomName($filePNS, 'pns');
-
+            if (!$filePathTNI || !$filePathPNS) {
+                throw new \Exception('File gagal disimpan.');
+            }
             // Simpan data ke database
             $header = Header::create([
                 'nama_header' => $request->nama_header,
@@ -99,7 +102,7 @@ class HeaderController extends Controller
             // Log aktivitas membuat header berhasil
             ActivityLogService::logCreateHeader([
                 'id' => $header->id,
-                'title' => $header->title
+                'title' => $header->nama_header
             ]);
             return redirect()->back()->with('sukses', 'Header berhasil ditambahkan');
         } catch (\Exception $e) {
@@ -107,7 +110,7 @@ class HeaderController extends Controller
             // Log aktivitas membuat header gagal
             ActivityLogService::log(
                 ActivityLogService::CREATE_HEADER,
-                'Gagal membuat header: ' . $request->title,
+                'Gagal membuat header: ' . $request->nama_header,
                 $request,
                 null,
                 'failed',
@@ -255,8 +258,10 @@ class HeaderController extends Controller
 
     public function destroy(Header $header)
     {
+        $fileTniPath = str_replace('storage/', '', $header->file_tni_path);
+        $filePnsPath = str_replace('storage/', '', $header->file_pns_path);
         // Delete related files
-        Storage::disk('public')->delete([$header->file_tni_path, $header->file_pns_path]);
+        Storage::disk('public')->delete([$fileTniPath, $filePnsPath]);
 
         $header->delete();
         // Log aktivitas menghapus header
@@ -329,12 +334,37 @@ class HeaderController extends Controller
     // }
 
 
-    private function storeFileWithCustomName($file, $prefix)
+    // private function storeFileWithCustomName($file, $prefix)
+    // {
+    //     try {
+    //         $extension = $file->getClientOriginalExtension();
+    //         $fileName = $prefix . '-' . time() . '_' . Str::random(10) . '.' . $extension;
+    //         return $file->storeAs('tukin', $fileName, 'public');
+    //     } catch (\Exception $e) {
+    //         Log::error('File upload error: ' . $e->getMessage());
+    //         return null;
+    //     }
+    // }
+    public function storeFileWithCustomName($file, $tipe)
     {
         try {
-            $extension = $file->getClientOriginalExtension();
-            $fileName = $prefix . '-' . time() . '_' . Str::random(10) . '.' . $extension;
-            return $file->storeAs('tukin', $fileName, 'public');
+            $tanggal = Carbon::parse(request()->tanggal);
+            $bulan = $tanggal->format('m');
+            $tahun = $tanggal->format('Y');
+            $kodeSatker = Auth::user()->role === 'admin'
+                ? request()->kode_satker
+                : Auth::user()->kode_satker;
+
+            $namaHeader = Str::slug(request()->nama_header);
+            $timestamp = now()->format('YmdHis');
+            $ext = $file->getClientOriginalExtension();
+
+            $filename = "{$kodeSatker}_{$namaHeader}_{$tipe}_{$timestamp}.{$ext}";
+            $folder = "tukin/{$tahun}/{$bulan}";
+
+            $path = $file->storeAs($folder, $filename, 'public');
+
+            return 'storage/' . $path;
         } catch (\Exception $e) {
             Log::error('File upload error: ' . $e->getMessage());
             return null;
