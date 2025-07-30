@@ -62,7 +62,8 @@ class HeaderController extends Controller
                 : 'required|in:' . Auth::user()->kode_satker,
             'tanggal' => 'required|date',
             'file_tni' => 'required|file|mimes:zip,xls,xlsx|max:2048',
-            'file_pns' => 'required|file|mimes:zip,xls,xlsx|max:2048'
+            'file_pns' => 'required|file|mimes:zip,xls,xlsx|max:2048',
+            'file_pdf' => 'required|file|mimes:pdf|max:2048'
         ]);
         if ($validator->fails()) {
             return redirect()->back()
@@ -76,8 +77,10 @@ class HeaderController extends Controller
             // Simpan file
             $fileTNI = $request->file('file_tni');
             $filePNS = $request->file('file_pns');
+            $filePDF = $request->file('file_pdf');
             $filePathTNI = $this->storeFileWithCustomName($fileTNI, 'tni');
             $filePathPNS = $this->storeFileWithCustomName($filePNS, 'pns');
+            $filePathPDF = $this->storeFileWithCustomName($filePDF, 'pdf');
             if (!$filePathTNI || !$filePathPNS) {
                 throw new \Exception('File gagal disimpan.');
             }
@@ -91,6 +94,7 @@ class HeaderController extends Controller
                 'tanggal' => $request->tanggal,
                 'file_tni_path' => $filePathTNI,
                 'file_pns_path' => $filePathPNS,
+                'file_pdf_path' => $filePathPDF,
                 'created_by' => Auth::id(), // Catat pembuat header
             ]);
 
@@ -260,8 +264,9 @@ class HeaderController extends Controller
     {
         $fileTniPath = str_replace('storage/', '', $header->file_tni_path);
         $filePnsPath = str_replace('storage/', '', $header->file_pns_path);
+        $filePdfPath = str_replace('storage/', '', $header->file_pdf_path);
         // Delete related files
-        Storage::disk('public')->delete([$fileTniPath, $filePnsPath]);
+        Storage::disk('public')->delete([$fileTniPath, $filePnsPath, $filePdfPath]);
 
         $header->delete();
         // Log aktivitas menghapus header

@@ -13,13 +13,21 @@
 
     <div class="mt-4 flex flex-col space-y-2">
         @if($header->file_tni_path)
-            <a href="{{ asset($header->file_tni_path) }}" class="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-sm text-center" download>
+            <a href="{{ asset($header->file_tni_path) }}"
+                class="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-sm text-center" download>
                 📥 Download TNI
             </a>
         @endif
         @if($header->file_pns_path)
-            <a href="{{ asset($header->file_pns_path) }}" class="text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl text-sm text-center" download>
+            <a href="{{ asset($header->file_pns_path) }}"
+                class="text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl text-sm text-center" download>
                 📥 Download PNS
+            </a>
+        @endif
+        @if($header->file_pdf_path)
+            <a href="{{ asset($header->file_pdf_path) }}"
+                class="text-white bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-xl text-sm text-center" download>
+                📥 Download PDF
             </a>
         @endif
     </div>

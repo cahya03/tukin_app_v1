@@ -182,6 +182,13 @@
                         <x-input-error :messages="$errors->get('file_pns')" class="mt-2" />
                     </div>
                 </div>
+                    <!-- File PDF -->
+                    <div>
+                        <x-input-label for="file_pns" :value="__('File PDF')" />
+                        <x-text-input id="file_pns" name="file_pdf" type="file" class="mt-1 block w-full" 
+                            accept=".pdf" required />
+                        <x-input-error :messages="$errors->get('file_pdf')" class="mt-2" />
+                    </div>
                 
                 <div class="flex justify-end space-x-3 mt-6">
                     <x-secondary-button type="button" @click="$dispatch('close-modal', 'create-header')">

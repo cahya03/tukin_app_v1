@@ -61,6 +61,23 @@
                                             <span class="text-red-500">File tidak tersedia</span>
                                         @endif
                                     </div>
+                                        <div>
+                                        <p class="font-semibold">File PDF:</p>
+                                        @if($header->file_pdf_path)
+                                            <a href="{{ $header->file_pdf_url }}"
+                                                class="text-blue-600 hover:underline flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M12 16v-8m0 8l-3-3m3 3l3-3m4 6H7.5a2.25 2.25 0 01-2.25-2.25V6.75A2.25 2.25 0 017.5 4.5h9a2.25 2.25 0 012.25 2.25v10.5A2.25 2.25 0 0116.5 18z" />
+                                                </svg>
+
+                                                Download File PDF
+                                            </a>
+                                        @else
+                                            <span class="text-red-500">File tidak tersedia</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>

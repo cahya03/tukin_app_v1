@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('kode_satker');
             $table->date('tanggal')->nullable();
             $table->string('file_tni_path')->nullable();  
-            $table->string('file_pns_path')->nullable();  
+            $table->string('file_pns_path')->nullable();
+            $table->string('file_pdf_path')->nullable();
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
 

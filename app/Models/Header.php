@@ -18,6 +18,7 @@ class Header extends Model
         'tanggal',
         'file_tni_path',
         'file_pns_path',
+        'file_pdf_path',
         'created_by',
     ];
     public function satker()
@@ -40,5 +41,9 @@ class Header extends Model
     public function getFilePnsUrlAttribute()
     {
         return asset($this->file_pns_path);
+    }
+    public function getFilePdfUrlAttribute()
+    {
+        return asset($this->file_pdf_path);
     }
 }
