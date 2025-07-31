@@ -22,23 +22,36 @@
                     </x-nav-link>
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    @can('view', App\Models\ActivityLog::class) 
-                    <x-nav-link :href="route('admin.activity-logs.index')" :active="request()->routeIs('admin.activity-logs.*')">
-                        Log
-                    </x-nav-link>
+                    @can('view', App\Models\ActivityLog::class)
+                        <x-nav-link :href="route('admin.activity-logs.index')"
+                            :active="request()->routeIs('admin.activity-logs.*')">
+                            Log
+                        </x-nav-link>
                     @endcan
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    @can('view', App\Models\User::class) 
-                    <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-                        User
-                    </x-nav-link>
+                    @can('view', App\Models\User::class)
+                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                            User
+                        </x-nav-link>
                     @endcan
                 </div>
             </div>
 
+
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <!-- Tombol Cetak Laporan -->
+                <x-nav-link :href="route('laporan.form')">
+                    <button
+                    class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 transition ease-in-out duration-150 me-3">
+                    <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M6 9V2h12v7M6 18h12v4H6v-4zM6 14h12v4H6v-4zM6 10h12v4H6v-4z" />
+                    </svg>
+                    Cetak
+                </button>
+                </x-nav-link>   
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button

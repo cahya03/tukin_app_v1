@@ -10,12 +10,12 @@
             @endif
         </h2>
     </x-slot>
-    <div class="py-12">
+    <div class="py-4">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Notifications -->
             <x-notification :success="$sukses ?? null" :errors="$errors->all() ?? null" />
             @if ((Auth::user()->role === 'admin'))
-                <div class="py-12" x-data="dashboardData()">
+                <div class="py-4" x-data="dashboardData()">
                     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                         <!-- Cek Card-->
                         <div class="mb-6 bg-white dark:bg-gray-800 shadow rounded-lg p-6">
@@ -356,6 +356,12 @@
                             }
                         }
                     }
+                    document.addEventListener('alpine:init', () => {
+                        Alpine.store('modal', {
+                            printOpen: false
+                        })
+                    })
+
                 </script>
             @elseif ((Auth::user()->role === 'juru_bayar'))
                 <!-- JURU BAYAR DASHBOARD CONTENT -->
@@ -519,7 +525,7 @@
                         Export Data
                     </a>
                 </div>
-                <script>
+                    <script>
                     function juruBayarCharts() {
                         return {
                             initCharts() {

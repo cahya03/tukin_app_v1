@@ -7,6 +7,7 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\TukinController;
+use App\Http\Controllers\LaporanController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -53,3 +54,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile/activity-logs', [ActivityLogController::class, 'userLogs'])->name('profile.activity-logs');
 });
+
+Route::get('/laporan', [LaporanController::class, 'form'])->name('laporan.form')
+    ->middleware(['auth', 'verified']);
+Route::get('/laporan/pdf', [LaporanController::class, 'laporanPDF'])->name('laporan.pdf')
+    ->middleware(['auth', 'verified']);
