@@ -63,11 +63,12 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex space-x-2">
+                                            {{-- Tombol Ganti Password --}}
+                                            <button @click="$dispatch('open-modal', 'change-pass-user-{{ $user->id }}')"
+                                                class="text-blue-600 hover:underline">Ganti Sandi</button>
                                             {{-- Tombol Edit --}}
                                             <button @click="$dispatch('open-modal', 'edit-user-{{ $user->id }}')"
                                                 class="text-yellow-600 hover:underline">Edit</button>
-
-
                                             {{-- Tombol Hapus --}}
                                             <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST"
                                                 onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
@@ -241,7 +242,55 @@
                 </x-modal>
             @endforeach
 
+            {{-- Modal Change Password User --}}
+            @foreach($users as $user)
+                @php
+                    $modalName = 'change-pass-user-' . $user->id;
+                @endphp
+                <x-modal name="{{ $modalName }}" maxWidth="2xl" :show="session('open_modal_id') === $modalName">
+                    <div class="p-6 bg-white dark:bg-gray-800 rounded-lg">
+                        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Edit Pengguna</h2>
 
+                        <form method="POST" action="{{ route('admin.users.update-password', $user->id) }}">
+                            @csrf
+                            @method('PUT')
+
+                            <div class="space-y-4">
+                                {{-- Email --}}
+                                <div>
+                                    <x-input-label for="edit-email-{{ $user->id }}" :value="__('Email')" />
+                                    <x-text-input id="edit-email-{{ $user->id }}" type="email" readonly
+                                        class="mt-1 block w-full disabled" :value="old('email', $user->email)" required />
+                                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                                </div>
+                                {{-- Password Baru --}}
+                                <div>
+                                    <x-input-label for="edit-password-{{ $user->id }}" :value="__('Password Baru')" />
+                                    <x-text-input id="edit-password-{{ $user->id }}" name="password" type="password"
+                                        class="mt-1 block w-full" required />
+                                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                                </div>
+                                {{-- Konfirmasi Password --}}
+                                <div>
+                                    <x-input-label for="conf-edit-password-{{ $user->id }}" :value="__('Konfirmasi Password Baru')" />
+                                    <x-text-input id="conf-edit-password-{{ $user->id }}" name="password_confirmation"
+                                        type="password" class="mt-1 block w-full" required />
+                                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end space-x-3 mt-6">
+                                <x-secondary-button type="button" @click="$dispatch('close-modal', '{{ $modalName }}')">
+                                    Batal
+                                </x-secondary-button>
+                                <x-primary-button type="submit">
+                                    Simpan Perubahan
+                                </x-primary-button>
+                            </div>
+                        </form>
+                    </div>
+                </x-modal>
+            @endforeach
         </div>
     </div>
 </x-app-layout>

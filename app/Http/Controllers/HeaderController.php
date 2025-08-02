@@ -43,11 +43,11 @@ class HeaderController extends Controller
             })
             ->select('kode_satker', 'nama_satker')
             ->get();
-
+        $name = Auth::user()->name ?? 'unknown';    
         // Log aktivitas melihat daftar header
         ActivityLogService::log(
             'view_headers_list',
-            'Melihat daftar header'
+            'User '.$name.' Melihat daftar header'
         );
         return view('headers.create', compact('headers', 'satkers'));
     }
@@ -106,7 +106,8 @@ class HeaderController extends Controller
             // Log aktivitas membuat header berhasil
             ActivityLogService::logCreateHeader([
                 'id' => $header->id,
-                'title' => $header->nama_header
+                'title' => $header->nama_header,
+                'name' => Auth::user()->name,
             ]);
             return redirect()->back()->with('sukses', 'Header berhasil ditambahkan');
         } catch (\Exception $e) {

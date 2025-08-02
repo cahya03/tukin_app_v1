@@ -48,6 +48,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
             'put' => 'admin.users.put',
             'update' => 'admin.users.update',
         ]);
+    Route::put('/users/{user}/password', [UsersController::class, 'updatePassword'])
+        ->name('admin.users.update-password');
 });
 
 // Routes untuk user melihat aktivitas sendiri

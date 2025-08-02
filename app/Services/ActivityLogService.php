@@ -120,11 +120,11 @@ class ActivityLogService
     /**
      * Log aktivitas login berhasil
      */
-    public static function logLoginSuccess(?Request $request = null): void
+    public static function logLoginSuccess(string $name, ?Request $request = null): void
     {
         self::log(
             self::LOGIN_SUCCESS,
-            'User berhasil login',
+            'User ' . $name . ' berhasil login',
             $request
         );
     }
@@ -149,11 +149,11 @@ class ActivityLogService
     /**
      * Log aktivitas logout
      */
-    public static function logLogout(?Request $request = null): void
+    public static function logLogout(string $name, ?Request $request = null): void
     {
         self::log(
             self::LOGOUT,
-            'User logout dari sistem',
+            'User '. $name .' logout dari sistem',
             $request
         );
     }
@@ -161,11 +161,11 @@ class ActivityLogService
     /**
      * Log aktivitas registrasi
      */
-    public static function logRegister(?Request $request = null): void
+    public static function logRegister(string $name, ?Request $request = null): void
     {
         self::log(
             self::REGISTER,
-            'User baru mendaftar',
+            'User '.$name.' baru mendaftar',
             $request
         );
     }
@@ -177,7 +177,7 @@ class ActivityLogService
     {
         self::log(
             self::CREATE_HEADER,
-            'Membuat header baru: ' . ($headerData['title'] ?? 'Unknown'),
+            'User '.$headerData['name'].' Membuat header baru: ' . ($headerData['title'] ?? 'Unknown'),
             $request,
             ['header_id' => $headerData['id'] ?? null]
         );

@@ -33,8 +33,8 @@ class DashboardController extends Controller
         $additionalStats = $this->getAdditionalStats();
         $tunkinUploadStatus = $this->getTunkinUploadStatus();
         $headers = Header::latest()->get();
-
-        ActivityLogService::log('view_admin_dashboard', 'Mengakses dashboard admin');
+        $name = Auth::user()->name ?? 'unknown';
+        ActivityLogService::log('view_admin_dashboard', 'User '.$name.' Mengakses dashboard admin');
 
         return view('dashboard', compact(
             'stats',

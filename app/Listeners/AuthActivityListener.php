@@ -18,7 +18,8 @@ class AuthActivityListener
      */
     public function handleLogin(Login $event): void
     {
-        ActivityLogService::logLoginSuccess();
+        $name = $event->user->name ?? 'unknown';
+        ActivityLogService::logLoginSuccess($name);
     }
 
     /**
@@ -26,7 +27,8 @@ class AuthActivityListener
      */
     public function handleLogout(Logout $event): void
     {
-        ActivityLogService::logLogout();
+        $name = $event->user->name ?? 'unknown';
+        ActivityLogService::logLogout($name);
     }
 
     /**
@@ -43,7 +45,8 @@ class AuthActivityListener
      */
     public function handleRegistered(Registered $event): void
     {
-        ActivityLogService::logRegister();
+        $name = $event->user->name ?? 'unknown';
+        ActivityLogService::logRegister($name);
     }
 
     /**

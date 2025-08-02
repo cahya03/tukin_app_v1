@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Services\ActivityLogService;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class UsersController extends Controller
 {
@@ -16,39 +18,39 @@ class UsersController extends Controller
     {
         $this->middleware(['auth', 'role:admin']);
     }
-    
+
     public function index()
     {
+        $name = Auth::user()->name ?? 'unknown';
         try {
             $users = User::with('satker')->get();
             $satkers = Satker::pluck(DB::raw("CONCAT(kode_satker, ' - ', nama_satker)"), 'kode_satker');
-            
             // Log activity untuk akses halaman users
             ActivityLogService::log(
                 ActivityLogService::VIEW_USER,
-                'Mengakses halaman daftar users',
+                'User '.$name.' Mengakses halaman daftar users',
                 request(),
                 ['total_users' => $users->count()]
             );
-            
+
             return view('admin.users.index', compact('users', 'satkers'));
         } catch (\Exception $e) {
             ActivityLogService::log(
                 ActivityLogService::VIEW_USER,
-                'Gagal mengakses halaman daftar users: ' . $e->getMessage(),
+                'User '.$name.' Gagal mengakses halaman daftar users: ' . $e->getMessage(),
                 request(),
                 ['error' => $e->getMessage()]
             );
-            
+
             return redirect()->back()->with('error', 'Gagal memuat data users.');
         }
     }
-    
+
     public function create()
     {
         try {
             $satkers = Satker::pluck('kode_satkers', 'id');
-            
+
             // Log activity untuk akses halaman create user
             ActivityLogService::log(
                 ActivityLogService::CREATE_USER,
@@ -56,7 +58,7 @@ class UsersController extends Controller
                 request(),
                 ['available_satkers' => $satkers->count()]
             );
-            
+
             return view('admin.users.create', compact('satkers'));
         } catch (\Exception $e) {
             ActivityLogService::log(
@@ -65,11 +67,11 @@ class UsersController extends Controller
                 request(),
                 ['error' => $e->getMessage()]
             );
-            
+
             return redirect()->back()->with('error', 'Gagal memuat halaman tambah user.');
         }
     }
-    
+
     public function store(Request $request)
     {
         try {
@@ -78,7 +80,7 @@ class UsersController extends Controller
                 'email' => 'required|email|unique:users,email',
                 'password' => 'required|string|min:6',
                 'role' => 'required|in:juru_bayar,admin',
-                'kode_satker' => $request->role === 'juru_bayar'? 'required|exists:satkers,kode_satker' : 'nullable',
+                'kode_satker' => $request->role === 'juru_bayar' ? 'required|exists:satkers,kode_satker' : 'nullable',
             ]);
 
             $user = User::create([
@@ -104,7 +106,6 @@ class UsersController extends Controller
             );
 
             return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
-            
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Log activity untuk validasi gagal
             ActivityLogService::log(
@@ -116,9 +117,8 @@ class UsersController extends Controller
                     'input_data' => $request->only(['name', 'email', 'role', 'kode_satker'])
                 ]
             );
-            
+
             return redirect()->back()->withErrors($e->errors())->withInput();
-            
         } catch (\Exception $e) {
             // Log activity untuk error lainnya
             ActivityLogService::log(
@@ -130,7 +130,7 @@ class UsersController extends Controller
                     'input_data' => $request->only(['name', 'email', 'role', 'kode_satker'])
                 ]
             );
-            
+
             return redirect()->back()->with('error', 'Gagal membuat user baru.')->withInput();
         }
     }
@@ -145,9 +145,9 @@ class UsersController extends Controller
                 'user_role' => $user->role,
                 'kode_satker' => $user->kode_satker
             ];
-            
+
             $user->delete();
-            
+
             // Log activity untuk berhasil menghapus user
             ActivityLogService::log(
                 ActivityLogService::DELETE_USER,
@@ -155,9 +155,8 @@ class UsersController extends Controller
                 request(),
                 $userData
             );
-            
+
             return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
-            
         } catch (\Exception $e) {
             // Log activity untuk gagal menghapus user
             ActivityLogService::log(
@@ -170,7 +169,7 @@ class UsersController extends Controller
                     'error' => $e->getMessage()
                 ]
             );
-            
+
             return redirect()->route('admin.users.index')->with('error', 'Gagal menghapus user.');
         }
     }
@@ -198,16 +197,16 @@ class UsersController extends Controller
                 );
                 return redirect()->back()->withErrors($validator)->withInput();
             }
-            
+
             $oldData = $user->only(['name', 'email', 'role', 'kode_satker']);
-            
+
             $user->update([
                 'name' => $request->name,
                 'email' => $request->email,
                 'role' => $request->role,
                 'kode_satker' => $request->role === 'juru_bayar' ? $request->kode_satker : null,
             ]);
-            
+
             $changes = [];
             $newData = $request->only(['name', 'email', 'role', 'kode_satker']);
             foreach ($newData as $key => $value) {
@@ -218,7 +217,7 @@ class UsersController extends Controller
                     ];
                 }
             }
-            
+
             // Log activity untuk berhasil update user
             ActivityLogService::log(
                 ActivityLogService::UPDATE_USER,
@@ -232,12 +231,11 @@ class UsersController extends Controller
                     'new_data' => $newData
                 ]
             );
-            
+
             // Gunakan method yang sudah ada jika masih diperlukan
             ActivityLogService::logUpdateUser($user->id, $changes);
-            
+
             return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
-            
         } catch (\Exception $e) {
             // Log activity untuk gagal update user
             ActivityLogService::log(
@@ -251,8 +249,70 @@ class UsersController extends Controller
                     'input_data' => $request->only(['name', 'email', 'role', 'kode_satker'])
                 ]
             );
-            
+
             return redirect()->back()->with('error', 'Gagal memperbarui user.')->withInput();
+        }
+    }
+
+    public function updatePassword(Request $request, User $user)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'password' => ['required', 'string', 'min:8', 'confirmed']
+            ]);
+
+            if ($validator->fails()) {
+                ActivityLogService::log(
+                    ActivityLogService::UPDATE_USER,
+                    'Gagal mengupdate password user ID: ' . $user->id . ' - Validasi gagal',
+                    $request,
+                    [
+                        'user_id' => $user->id,
+                        'validation_errors' => $validator->errors(),
+                        'input_data' => $request->only(['password', 'password_confirmation'])
+                    ]
+                );
+                return redirect()->back()->withErrors($validator)->withInput()->with('open_modal_id', 'change-pass-user-' . $user->id);;
+            }
+            $oldHashedPassword = $user->password;
+
+
+            $user->update([
+                'password' => Hash::make($request->name),
+            ]);
+
+            // Log activity untuk berhasil update user
+            ActivityLogService::log(
+                ActivityLogService::UPDATE_USER,
+                'Berhasil memperbarui password user: ' . $user->name,
+                $request,
+                [
+                    'user_id' => $user->id,
+                    'user_name' => $user->name,
+                    'changes' => [
+                        'password' => [
+                            'old' => $oldHashedPassword,
+                            'new' => '[PASSWORD_UPDATED]'
+                        ]
+                    ]
+                ]
+            );
+            return redirect()->route('admin.users.index')->with('success', 'Password berhasil diperbarui.');
+        } catch (\Exception $e) {
+            // Log activity untuk gagal update user
+            ActivityLogService::log(
+                ActivityLogService::UPDATE_USER,
+                'Gagal memperbarui password user ID: ' . $user->id . ' - ' . $e->getMessage(),
+                $request,
+                [
+                    'user_id' => $user->id,
+                    'user_name' => $user->name,
+                    'error' => $e->getMessage(),
+                    'input_data' => $request->only(['password', 'password_confirmation'])
+                ]
+            );
+
+            return redirect()->back()->with('error', 'Gagal memperbarui password user.')->withInput();
         }
     }
 }
