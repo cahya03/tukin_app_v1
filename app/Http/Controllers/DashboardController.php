@@ -13,17 +13,19 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         if (Auth::user()->role === 'admin') {
-            return $this->adminDashboard();
+            return $this->adminDashboard($request);
         }
 
         return $this->juruBayarDashboard();
     }
 
-    protected function adminDashboard()
+    protected function adminDashboard(request $request)
     {
+        $year = $request->input('year', now()->year);
+
         $stats = $this->getAdminStatistics();
         $monthlyData = $this->getMonthlyData();
         $tniPnsData = $this->getTniPnsData();
@@ -31,9 +33,10 @@ class DashboardController extends Controller
         $satkerComparison = $this->getSatkerComparison();
         $recentActivities = $this->getRecentActivities(5);
         $additionalStats = $this->getAdditionalStats();
-        $tunkinUploadStatus = $this->getTunkinUploadStatus();
+        $tunkinUploadStatus = $this->getTunkinUploadStatus($year);
         $headers = Header::latest()->get();
         $name = Auth::user()->name ?? 'unknown';
+
         ActivityLogService::log('view_admin_dashboard', 'User '.$name.' Mengakses dashboard admin');
 
         return view('dashboard', compact(
@@ -45,7 +48,8 @@ class DashboardController extends Controller
             'satkerComparison',
             'additionalStats',
             'tunkinUploadStatus',
-            'headers'
+            'headers',
+            'year'
         ));
     }
 
@@ -302,7 +306,6 @@ class DashboardController extends Controller
         });
         return $uploadStatus;
     }
-
     public function getDashboardData()
     {
         if (Auth::user()->role === 'admin') {

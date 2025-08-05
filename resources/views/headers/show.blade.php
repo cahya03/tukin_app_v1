@@ -88,8 +88,8 @@
                 <div class="space-y-4 text-gray-800 dark:text-white mb-6">
                     <h3 class="text-lg font-semibold border-b pb-2 border-gray-300 dark:border-gray-600">Statistik</h3>
                     <p><span class="font-medium">Total Data:</span> {{ $header->tukins->count() }}</p>
-                    <p><span class="font-medium">TNI:</span> {{ $tniData->count() }}</p>
-                    <p><span class="font-medium">PNS:</span> {{ $pnsData->count() }}</p>
+                    <p><span class="font-medium">TNI:</span> {{ $totalTni }}</p>
+                    <p><span class="font-medium">PNS:</span> {{ $totalPns }}</p>
                 </div>
                 <!-- Search Form -->
                 <div class="mb-6">
@@ -125,12 +125,12 @@
                             <button @click="activeTab = 'tni'"
                                 :class="activeTab === 'tni' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
                                 class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-                                Data TNI ({{ $tniData->count() }})
+                                Data TNI ({{ $totalTni }})
                             </button>
                             <button @click="activeTab = 'pns'"
                                 :class="activeTab === 'pns' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
                                 class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-                                Data PNS ({{ $pnsData->count() }})
+                                Data PNS ({{ $totalPns }})
                             </button>
                         </nav>
                     </div>

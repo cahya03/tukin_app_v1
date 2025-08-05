@@ -20,7 +20,7 @@
                         <!-- Cek Card-->
                         <div class="mb-6 bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                             <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-                                Rekap Upload Tukin ({{ now()->year }})
+                                Rekap Upload Tukin ({{ $year }})
                             </h2>
 
                             <div class="overflow-x-auto">
@@ -34,6 +34,18 @@
                                         <span>Belum diupload</span>
                                     </div>
                                 </div>
+                                <form method="GET" action="{{ route('dashboard') }}" class="mb-4">
+                                    <label for="year" class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">
+                                        Pilih Tahun:
+                                    </label>
+                                    <select id="year" name="year" onchange="this.form.submit()" class="...">
+                                        @foreach (range(now()->year, 2020) as $yearOption)
+                                            <option value="{{ $yearOption }}" {{ $year == $yearOption ? 'selected' : '' }}>
+                                                {{ $yearOption }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </form>
                                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm text-center">
                                     <thead class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                                         <tr>
@@ -525,7 +537,7 @@
                         Export Data
                     </a>
                 </div>
-                    <script>
+                <script>
                     function juruBayarCharts() {
                         return {
                             initCharts() {
