@@ -19,7 +19,7 @@ class DashboardController extends Controller
             return $this->adminDashboard($request);
         }
 
-        return $this->juruBayarDashboard();
+        return $this->juruBayarDashboard($request);
     }
 
     protected function adminDashboard(request $request)
@@ -53,22 +53,27 @@ class DashboardController extends Controller
         ));
     }
 
-    protected function juruBayarDashboard()
+    protected function juruBayarDashboard(Request $request)
     {
+        $year = $request->input('year', now()->year);
         $satkerId = Auth::user()->kode_satker;
 
         $stats = $this->getJuruBayarStatistics($satkerId);
         $pangkatData = $this->getPangkatData($satkerId);
         $paymentHistory = $this->getPaymentHistory($satkerId, 6);
         $recentHeaders = $this->getRecentHeaders($satkerId, 5);
+        $tunkinUploadStatus = $this->getTunkinUploadStatus($year, $satkerId);
+        $name = Auth::user()->name ?? 'unknown';
 
-        ActivityLogService::log('view_jurubayar_dashboard', 'Mengakses dashboard juru bayar');
+        ActivityLogService::log('view_jurubayar_dashboard', 'User '.$name.' Mengakses dashboard juru bayar');
 
         return view('dashboard', compact(
             'stats',
             'pangkatData',
             'paymentHistory',
-            'recentHeaders'
+            'recentHeaders',
+            'tunkinUploadStatus',
+            'year',
         ));
     }
 
@@ -281,11 +286,15 @@ class DashboardController extends Controller
         ];
     }
     
-    protected function getTunkinUploadStatus($tahun = null)
+    protected function getTunkinUploadStatus($tahun = null, $kodeSatker = null)
     {
         $tahun = $tahun ?? now()->year;
-        $satkers = Satker::orderBy('kode_satker')->get();
 
+        if ($kodeSatker) {
+            $satkers = Satker::where('kode_satker', $kodeSatker)->get();
+        } else {
+            $satkers = Satker::orderBy('kode_satker')->get();
+        }
         $uploadStatus = $satkers->map(function ($satker) use ($tahun) {
         $statusPerBulan = [];
 

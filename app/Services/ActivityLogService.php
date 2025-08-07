@@ -31,6 +31,7 @@ class ActivityLogService
     const PROFILE_UPDATE = 'profile_update';
     const EMAIL_VERIFICATION = 'email_verification';
     const UNAUTHORIZED_ACCESS = 'unauthorized_access';
+    public const CETAK_LAPORAN     = 'cetak_laporan';
 
 
     /**
@@ -377,6 +378,13 @@ class ActivityLogService
                 'trace' => $e->getTraceAsString()
             ];
         }
+    }
+    /**
+     * log cetak laporan
+     */
+        public static function logCetakLaporan(string $keterangan, ?Request $request = null): void
+    {
+        self::log(self::CETAK_LAPORAN, $keterangan, $request);
     }
 
     /**
