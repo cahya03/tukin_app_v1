@@ -52,4 +52,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function headersCreated()
+    {
+        return $this->hasMany(Header::class, 'created_by');
+    }
 }

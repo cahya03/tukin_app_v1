@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Header;
 use App\Models\Satker;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -23,18 +24,45 @@ class HeaderController extends Controller
         $this->middleware('can:view,header')->only('show');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        // Filter berdasarkan role user
-        $headers = Header::query()
+        // Base query dengan filter role user
+        $query = Header::query()
             ->when(Auth::user()->role === 'juru_bayar', function ($query) {
                 $query->where('kode_satker', Auth::user()->satker->kode_satker);
             })
             ->with(['satker' => function ($query) {
                 $query->select('kode_satker', 'nama_satker');
-            }])
-            ->latest()
-            ->paginate(10);
+            }, 'creator' => function ($query) {
+                $query->select('id', 'name');
+            }]);
+
+        // Apply additional filters from request
+        if ($request->filled('search')) {
+            $query->where('nama_header', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('satker')) {
+            $query->where('kode_satker', $request->satker);
+        }
+
+        if ($request->filled('creator')) {
+            $query->where('created_by', $request->creator);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('tanggal', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('tanggal', '<=', $request->date_to);
+        }
+
+        // Get data with pagination
+        $headers = $query->latest()->paginate(10);
+
+        // Preserve query parameters in pagination links
+        $headers->appends($request->all());
 
         // Filter satker yang bisa dipilih berdasarkan role
         $satkers = Satker::query()
@@ -43,13 +71,29 @@ class HeaderController extends Controller
             })
             ->select('kode_satker', 'nama_satker')
             ->get();
-        $name = Auth::user()->name ?? 'unknown';    
+
+        // Get creators for filter dropdown (hanya yang pernah membuat header dan sesuai role)
+        $creatorsQuery = User::select('id', 'name')
+            ->whereHas('headersCreated', function ($query) {
+                // Jika juru bayar, hanya tampilkan creator dari satker yang sama
+                if (Auth::user()->role === 'juru_bayar') {
+                    $query->where('kode_satker', Auth::user()->satker->kode_satker);
+                }
+            })
+            ->distinct()
+            ->orderBy('name');
+
+        $creators = $creatorsQuery->get();
+
+        $name = Auth::user()->name ?? 'unknown';
+
         // Log aktivitas melihat daftar header
         ActivityLogService::log(
             'view_headers_list',
-            'User '.$name.' Melihat daftar header'
+            'User ' . $name . ' Melihat daftar header'
         );
-        return view('headers.create', compact('headers', 'satkers'));
+
+        return view('headers.create', compact('headers', 'satkers', 'creators'));
     }
 
     public function store(Request $request)
@@ -184,8 +228,13 @@ class HeaderController extends Controller
             $header->nama_header,
         );
 
-        return view('headers.show', compact('header', 'tniData', 'pnsData',
-    'totalTni','totalPns'));
+        return view('headers.show', compact(
+            'header',
+            'tniData',
+            'pnsData',
+            'totalTni',
+            'totalPns'
+        ));
     }
 
     public function edit(Header $header)
@@ -302,5 +351,80 @@ class HeaderController extends Controller
             Log::error('File upload error: ' . $e->getMessage());
             return null;
         }
+    }
+    public function export(Request $request)
+    {
+        // Base query dengan filter role user yang sama seperti index
+        $query = Header::query()
+            ->when(Auth::user()->role === 'juru_bayar', function ($query) {
+                $query->where('kode_satker', Auth::user()->satker->kode_satker);
+            })
+            ->with(['satker' => function ($query) {
+                $query->select('kode_satker', 'nama_satker');
+            }, 'creator' => function ($query) {
+                $query->select('id', 'name');
+            }]);
+
+        // Apply additional filters from request (sama seperti di index)
+        if ($request->filled('search')) {
+            $query->where('nama_header', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('satker')) {
+            $query->where('kode_satker', $request->satker);
+        }
+
+        if ($request->filled('creator')) {
+            $query->where('created_by', $request->creator);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('tanggal', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('tanggal', '<=', $request->date_to);
+        }
+
+        $headers = $query->latest()->get();
+
+        $name = Auth::user()->name ?? 'unknown';
+
+        // Log aktivitas export
+        ActivityLogService::log(
+            'export_headers',
+            'User ' . $name . ' Mengekspor data header (' . count($headers) . ' records)'
+        );
+
+        // Generate CSV
+        $filename = 'headers_export_' . now()->format('Y-m-d_H-i-s') . '.csv';
+
+        $headers_csv = [
+            ['ID', 'Nama Header', 'Satker', 'Tanggal', 'Dibuat Oleh', 'Dibuat Pada']
+        ];
+
+        foreach ($headers as $header) {
+            $headers_csv[] = [
+                $header->id,
+                $header->nama_header,
+                $header->satker->nama_satker ?? 'N/A',
+                \Carbon\Carbon::parse($header->tanggal)->format('d/m/Y'),
+                $header->creator->name ?? 'System',
+                $header->created_at->format('d/m/Y H:i:s')
+            ];
+        }
+
+        $callback = function () use ($headers_csv) {
+            $file = fopen('php://output', 'w');
+            foreach ($headers_csv as $row) {
+                fputcsv($file, $row);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 }

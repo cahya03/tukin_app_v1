@@ -64,3 +64,6 @@ Route::get('/laporan', [LaporanController::class, 'form'])->name('laporan.form')
     ->middleware(['auth', 'verified']);
 Route::get('/laporan/pdf', [LaporanController::class, 'laporanPDF'])->name('laporan.pdf')
     ->middleware(['auth', 'verified']);
+
+Route::get('/headers/export', [HeaderController::class, 'export'])->name('headers.export');
+
