@@ -80,14 +80,13 @@
                             <a href="{{ route('headers.index') }}" class="bg-gray-500 hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-800 text-white font-bold py-2 px-4 rounded transition duration-200">
                                 Reset
                             </a>
-                        </div>
-                        
-                        <div class="flex items-end">
+                        </div>                        
+                        {{-- <div class="flex items-end">
                             <a href="{{ route('headers.export', request()->all()) }}" 
                                class="bg-green-500 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-800 text-white font-bold py-2 px-4 rounded transition duration-200">
                                 Export CSV
                             </a>
-                        </div>
+                        </div> --}}
                     </form>
                 </div>
             </div>
