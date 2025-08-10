@@ -25,26 +25,28 @@ class LaporanController extends Controller
     }
     public function laporanPDF(Request $request)
 {
+    $user = Auth::user();
+    $name = $user->name ?? 'unknown';
+
     try {
+        // Validasi input
         $validator = Validator::make($request->all(), [
             'bulan_awal' => 'required|integer|min:1|max:12',
             'bulan_akhir' => 'required|integer|min:1|max:12',
             'tahun_awal' => 'required|integer|min:2000|max:' . date('Y'),
             'tahun_akhir' => 'required|integer|min:2000|max:' . date('Y'),
         ]);
-        $name = Auth::user()->name ?? 'unknown';
+
         if ($validator->fails()) {
             ActivityLogService::log(
                 ActivityLogService::CETAK_LAPORAN,
                 'User '.$name.' gagal mencetak laporan: validasi input gagal',
                 $request
             );
-
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        // Ambil periode
         $bulanAwal = (int) $request->bulan_awal;
         $bulanAkhir = (int) $request->bulan_akhir;
         $tahunAwal = (int) $request->tahun_awal;
@@ -56,16 +58,20 @@ class LaporanController extends Controller
         if ($periodeAwal > $periodeAkhir) {
             ActivityLogService::log(
                 ActivityLogService::CETAK_LAPORAN,
-                'User '.$name.' Gagal mencetak laporan: periode akhir lebih awal dari awal',
+                'User '.$name.' gagal mencetak laporan: periode akhir lebih awal dari awal',
                 $request
             );
-
             return redirect()->back()
                 ->withErrors(['Periode akhir tidak boleh lebih awal dari periode awal.'])
                 ->withInput();
         }
 
-        $data = DB::select("
+        // Cek role user
+        $isAdmin = $user->role === 'admin';
+        $kodeSatkerUser = $user->kode_satker ?? null;
+
+        // Query dasar
+        $sql = "
             SELECT 
                 s.kode_satker,
                 s.nama_satker,
@@ -77,17 +83,39 @@ class LaporanController extends Controller
             JOIN headers h ON h.id = t.header_id
             JOIN satkers s ON s.kode_satker = h.kode_satker
             WHERE (YEAR(h.tanggal) * 100 + MONTH(h.tanggal)) BETWEEN ? AND ?
+        ";
+
+        $params = [$periodeAwal, $periodeAkhir];
+
+        // Kalau bukan admin → filter satker sesuai user
+        if (!$isAdmin) {
+            if (!$kodeSatkerUser) {
+                ActivityLogService::log(
+                    ActivityLogService::CETAK_LAPORAN,
+                    'User '.$name.' gagal mencetak laporan: satker tidak terdeteksi',
+                    $request
+                );
+                return redirect()->back()
+                    ->withErrors(['Kode satker tidak ditemukan untuk akun Anda.'])
+                    ->withInput();
+            }
+            $sql .= " AND s.kode_satker = ? ";
+            $params[] = $kodeSatkerUser;
+        }
+
+        $sql .= "
             GROUP BY s.kode_satker, s.nama_satker, tahun, bulan
             ORDER BY s.kode_satker, tahun, bulan
-        ", [$periodeAwal, $periodeAkhir]);
+        ";
+
+        $data = DB::select($sql, $params);
 
         if (empty($data)) {
             ActivityLogService::log(
                 ActivityLogService::CETAK_LAPORAN,
-                'User '.$name.' Gagal mencetak laporan: tidak ada data pada rentang waktu yang dipilih',
+                'User '.$name.' gagal mencetak laporan: tidak ada data',
                 $request
             );
-
             return redirect()->back()
                 ->withErrors(['Tidak ada data ditemukan untuk rentang waktu yang dipilih.'])
                 ->withInput();
@@ -97,7 +125,7 @@ class LaporanController extends Controller
 
         ActivityLogService::log(
             ActivityLogService::CETAK_LAPORAN,
-            'User '.$name.' Berhasil mencetak laporan periode ' . $bulanAwal . '/' . $tahunAwal . ' - ' . $bulanAkhir . '/' . $tahunAkhir,
+            'User '.$name.' berhasil mencetak laporan periode ' . $bulanAwal . '/' . $tahunAwal . ' - ' . $bulanAkhir . '/' . $tahunAkhir,
             $request
         );
 
@@ -112,13 +140,13 @@ class LaporanController extends Controller
         ]);
 
         return $pdf->stream('laporan-rekap-tukin.pdf');
+
     } catch (\Exception $e) {
         ActivityLogService::log(
             ActivityLogService::CETAK_LAPORAN,
-            'User '.$name.' Gagal mencetak laporan: ' . $e->getMessage(),
+            'User '.$name.' gagal mencetak laporan: ' . $e->getMessage(),
             $request
         );
-
         return redirect()->back()
             ->withErrors(['Terjadi kesalahan saat membuat laporan. Silakan coba lagi.'])
             ->withInput();
